@@ -7,7 +7,7 @@ client.login(process.env.token);
 client.on("ready", async () =>{
 
     console.log(`${client.user.username} Is Online!`);
-    client.user.setActivity("/help to get started!", {type: "PLAYING"})
+    client.user.setActivity("controleerd jullie maagdheid!", {type: "LOOKING"})
 
 });
 
