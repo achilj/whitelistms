@@ -52,10 +52,10 @@ client.on("message", async message =>{
 
     var commands = bot.commands.get(command.slice(prefix.length));
 
-    if(commands) command.run(bot, message, args);
+    if(commands) command.run(bot,message, arguments);
 
 
-    
+
     //
     //if(command === `${prefix}server`){
     //    return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu`")
