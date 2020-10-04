@@ -7,7 +7,7 @@ client.login(process.env.token);
 client.on("ready", async () =>{
 
     console.log(`${client.user.username} Is Online!`);
-    client.user.setActivity("jullie maagdheid", {type: "WATCHING"})
+    client.user.setActivity("naar jullie", {type: "WATCHING"})
 
 });
 
@@ -23,8 +23,8 @@ client.on("message", async message =>{
 
     var command = messageArray[0];
 
-    if(command === `${prefix}whitelist`){
-        return message.channel.send("**Weet ik veel?** `Ik zou zeggen test het uit... :)`")
+    if(command === `${prefix}server`){
+        return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu :)`")
     }
      
     async function promptMessage(message, author, time, reactions) {
