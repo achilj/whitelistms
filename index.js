@@ -1,7 +1,34 @@
 const discord = require("discord.js");
 const botConfig = require("./botConfig.json");
 
+const fs = require("fs");
+
 const client = new discord.Client();
+bot.commands = new discord.Collection();
+
+fs.readdir("./commands/" , (err, files) => {
+
+    if(err) console.log(err);
+
+    var jsFiles = files.filter(f => f.split(".").pop() === "js");
+
+    if(jsFiles.length <= 0) {
+        console.log("ik vind geen file's!");
+        return;
+    }
+
+    jsFiles.forEach((f, i) => {
+        
+        var fileGet = require(`./commands/${f}`);
+        console.log(`De File ${f} is geladen!`)
+
+        bot.commands.set(fileGet.help.name, fileGet);
+
+    })
+
+});
+
+
 client.login(process.env.token);
 
 client.on("ready", async () =>{
@@ -23,9 +50,16 @@ client.on("message", async message =>{
 
     var command = messageArray[0];
 
-    if(command === `${prefix}server`){
-        return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu :)`")
-    }
+    var commands = bot.commands.get(command.slice(prefix.length));
+
+    if(commands) command.run(bot, message, args);
+
+
+    
+    //
+    //if(command === `${prefix}server`){
+    //    return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu`")
+    //}
      
     async function promptMessage(message, author, time, reactions) {
         time *= 1000;
