@@ -6,30 +6,29 @@ const fs = require("fs");
 const client = new discord.Client();
 bot.commands = new discord.Collection();
 
-fs.readdir("./commands/" , (err, files) => {
+client.login(process.env.token);
 
-    if(err) console.log(err);
+fs.readdir("./comands/", (err, files) => {
+
+    if (err) console.log(err);
 
     var jsFiles = files.filter(f => f.split(".").pop() === "js");
 
-    if(jsFiles.length <= 0) {
-        console.log("ik vind geen file's!");
+    if (jsFiles.length <= 0) {
+        console.log("Kon geen files vinden!");
         return;
     }
 
     jsFiles.forEach((f, i) => {
-        
-        var fileGet = require(`./commands/${f}`);
-        console.log(`De File ${f} is geladen!`)
+
+        var fileGet = require(`./comands/${f}`);
+        console.log(`De file ${f} is geladen`);
 
         bot.commands.set(fileGet.help.name, fileGet);
 
     })
 
 });
-
-
-client.login(process.env.token);
 
 client.on("ready", async () =>{
 
@@ -40,19 +39,21 @@ client.on("ready", async () =>{
 
 client.on("message", async message =>{
 
-    if(message.author.bot) return;
+    if (message.author.bot) return;
 
-    if(message.channel.type == "dm") return;
+    if (message.channel.type === "dm") return;
 
     var prefix = botConfig.prefix;
 
-    var messageArray = message.content.split(" ")
+    var messageArray = message.content.split(" ");
 
     var command = messageArray[0];
 
-    var commands = bot.commands.get(command.slice(prefix.length));
+    var arguments = messageArray.slice(1);
 
-    if(commands) command.run(bot,message, arguments);
+    var comands = bot.commands.get(command.slice(prefix.length));
+
+    if (comands) comands.run(bot, message, arguments);
 
 
 
