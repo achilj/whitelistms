@@ -1,8 +1,10 @@
 const discord = require("discord.js");
 
-module.exports.run = async(bot, message, args) => {
+module.exports.run = async(client, message, args) => {
 
-    console.log("test");
+    if(command === `${prefix}server`){
+        return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu`")
+    }   
 
 }
 
