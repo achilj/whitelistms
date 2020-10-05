@@ -8,7 +8,7 @@ client.commands = new discord.Collection();
 
 client.login(process.env.token);
 
-fs.readdir("./comands/", (err, files) => {
+fs.readdir("./commands/", (err, files) => {
 
     if (err) console.log(err);
 
