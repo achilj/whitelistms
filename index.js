@@ -1,24 +1,66 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TROEP VOOR BOT DISCORD OP TE HALEN EN ANDERE DINGEN
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const discord = require("discord.js");
 const botConfig = require("./botConfig.json");
 
 const fs = require("fs");
 
 const client = new discord.Client();
-
 client.login(process.env.token);
 
-client.on("ready", async () =>{
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//COMMAND HANDLER
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+client.commands = new discord.Collection();
 
-    console.log(`${client.user.username} Is Online!`);
-    client.user.setActivity("Achil", {type: "WATCHING"})
+fs.readdir("./commands/", (err, files) => {
+
+    if (err) console.log(err)
+
+    var jsFiles = files.filter(f => f.split(".").pop() === "js");
+
+    if(jsFiles.length <=0) {
+        console.log("Kon geen files vinden...")
+        return;
+    }
+
+    jsFiles.forEach((f,i) => {
+        
+        var fileGet = require(`./commands/${f}`);
+        console.log(`${f} loaded.`)
+
+        client.commands.set(fileGet.help.name, fileGet);
+
+        
+
+
+    })
 
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//STATUS + CONSOLE BERICHT
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+client.on("ready", async () =>{
+
+    console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setActivity("!help", 
+    {type: "STREAMING",
+     url: "https://twitch.tv/realistiqrp"
+    })
+
+});
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TROEP OM BERICHTEN TE KUNNEN STUREN OFZO...
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 client.on("message", async message =>{
 
-    if (message.author.bot) return;
+    if(message.author.bot) return;
 
-    if (message.channel.type === "dm") return;
+    if(message.channel.type == "dm") return;
 
     var prefix = botConfig.prefix;
 
@@ -26,58 +68,72 @@ client.on("message", async message =>{
 
     var command = messageArray[0];
 
-    var arguments = messageArray.slice(1);
+    var commands = client.commands.get(command.slice(prefix.length));
 
-    var comands = bot.commands.get(command.slice(prefix.length));
+    if(commands) commands.run(client, message, arguments);
 
-    if (comands) comands.run(bot, message, arguments);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//JOIN/LEAVE
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// dit doet niks, zeer bizar naar mijn mening //
 
+client.on('guildMemberAdd', member => {
 
-    if(command === `${prefix}server`){
-    return message.channel.send("**__De Wijnpers 2020-2021__** `IP: dewijnpers.serv.nu`")
-    }
+    var joinEmbed = new discord.MessageEmbed()
+.setColor("GREEN")
+.setTitle("__REIZIGER AANGEKOMEN__")
+.setTimestamp()
+.setDescription(`Welkom in de stad <@${member.user.id}>, Lees heel efkes de regels door 😉!`)
+.setFooter(`UserID: ${member.user.id}`);
 
-    if(command === `${prefix}clear`){
-        if (!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("Je hebt geen toestemming");
- 
-        if (!args[0]) return message.reply("Geef een aantal op dat je weg wilt halen");
+var joinChannel = message.member.guild.channels.cache.get("702217465660178504")
+
+if(!joinChannel) return;
+
+joinChannel.send(joinEmbed)
+
+});
+
+client.on('guildMemberRemove', member => {
+
+    var leaveEmbed = new discord.MessageEmbed()
+    .setColor("RED")
+    .setTitle("__ER HEEFT IEMAND DE STAD VERLATEN__")
+    .setTimestamp()
+    .setDescription(`<@${member.user.id}> heeft de stad verlaten 😔!`)
+    .setFooter(`UserID: ${member.user.id}`);
     
-        if (Number.isInteger(parseInt(args[0]))) {
-    
-            var aantal = parseInt(args[0]) + 1;
-    
-            message.channel.bulkDelete(aantal).then(() => { 
-    
-                if (args[0] == 0) {
-    
-                    message.reply(`Ben je loemp ik kan toch niet 0 berichten verwijderen?`).then(msg => msg.delete({timeout: 3000}));
-            
-                } else if (args[0] == 1) {
-            
-                    message.reply(`Ik heb 1 bericht verwijderd.`).then(msg => msg.delete({timeout: 3000}));
-            
-                } else {
-            
-                    message.reply(`Ik heb ${args[0]} berichten verwijderd.`).then(msg => msg.delete({timeout: 3000}));
-            
-                }
-    
-            })
-    
-        } else {
-            return message.reply("Geef een getal op.");
-        }
-    }
-     
-    async function promptMessage(message, author, time, reactions) {
-        time *= 1000;
+    var leaveChannel = message.member.guild.channels.cache.get("702217465660178504")
 
-        for (const reaction of reactions) {
-            await message.react(reaction);
-        }
+    if(!leaveChannel) return;
+    
+    leavechannel.send(leaveEmbed)
+    
+});
 
-        const filter = (reaction, user) => reactions.includes(reaction.emoji.name) && user.id === author.id;
-     
-        return message.awaitReactions(filter, { max: 1, time: time }).then(collected => collected.first() && collected.first().emoji.name);
-    }});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//MESSAGE DELETE LOGS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+client.on('messageDelete', message => {
+var embed = new discord.MessageEmbed()
+.setColor("RED")
+.setTitle("__Bericht Verwijderd__")
+.setTimestamp()
+.setDescription(`**Bericht van:** <@${message.author.id}> \n**Kanaal:** <#${message.channel.id}>`)
+.setFooter(`UserID: ${message.author.id}`);
+
+var channel = message.member.guild.channels.cache.get("782567135809241119")
+
+if(!channel) return;
+
+channel.send(embed)
+
+    })
+
+})
+
+
+
+    client.login(botConfig.token);
